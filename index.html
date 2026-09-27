@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TreeFlow Studio - Flowchart & Family Tree Designer</title>
+  <meta name="description" content="Design beautiful family trees and professional flowcharts with one-click node branching, interactive pan-zoom canvas, custom page sizes, orientations, and instant PNG/SVG/PDF export.">
+  
+  <!-- Modern Typography & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="theme-dark">
+  <!-- Top Navigation / Header -->
+  <header class="app-header">
+    <div class="header-left">
+      <div class="brand">
+        <div class="brand-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="7" height="7" rx="1.5"></rect>
+            <rect x="14" y="3" width="7" height="7" rx="1.5"></rect>
+            <rect x="14" y="14" width="7" height="7" rx="1.5"></rect>
+            <rect x="3" y="14" width="7" height="7" rx="1.5"></rect>
+            <path d="M10 6.5h4"></path>
+            <path d="M6.5 10v4"></path>
+            <path d="M17.5 10v4"></path>
+            <path d="M10 17.5h4"></path>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1>TreeFlow <span class="badge-pro">Studio</span></h1>
+        </div>
+      </div>
+
+      <div class="divider-vertical"></div>
+
+      <!-- Mode Selector -->
+      <div class="segmented-control" id="modeSelector" title="Switch Canvas Mode">
+        <button class="seg-btn active" data-mode="family" id="btnModeFamily">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          Family Tree
+        </button>
+        <button class="seg-btn" data-mode="flowchart" id="btnModeFlow">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="6" height="6" rx="1"/><rect x="15" y="15" width="6" height="6" rx="1"/><path d="M6 9v3a3 3 0 0 0 3 3h6"/></svg>
+          Flowchart
+        </button>
+      </div>
+
+      <!-- Document Title -->
+      <div class="doc-title-wrapper">
+        <input type="text" id="documentTitleInput" value="My Family Tree" spellcheck="false" title="Click to rename project" />
+        <span class="save-status" id="saveStatusIndicator" title="Changes auto-saved locally">Saved</span>
+      </div>
+    </div>
+
+    <!-- Quick Page & Layout Controls in Header -->
+    <div class="header-center">
+      <!-- Page Size Selector -->
+      <div class="control-group" title="Select Page Size for Printing or Canvas Frame">
+        <label for="pageSizeSelect">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+          Size:
+        </label>
+        <select id="pageSizeSelect" class="header-select">
+          <option value="infinite">Infinite Canvas</option>
+          <option value="a4" selected>A4 (210 × 297 mm)</option>
+          <option value="a3">A3 (297 × 420 mm)</option>
+          <option value="letter">US Letter (8.5 × 11 in)</option>
+          <option value="legal">US Legal (8.5 × 14 in)</option>
+          <option value="screen169">Screen 16:9 (HD)</option>
+        </select>
+      </div>
+
+      <!-- Orientation Selector -->
+      <div class="control-group" id="orientationControlGroup" title="Select Page Orientation">
+        <label>Orientation:</label>
+        <div class="toggle-buttons">
+          <button class="toggle-btn" id="btnOrientationPortrait" data-orientation="portrait" title="Portrait Mode">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/></svg>
+            Portrait
+          </button>
+          <button class="toggle-btn active" id="btnOrientationLandscape" data-orientation="landscape" title="Landscape Mode">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/></svg>
+            Landscape
+          </button>
+        </div>
+      </div>
+
+      <!-- Auto Snap & Alignment Guides Toggle -->
+      <div class="control-group" title="Magnetic Auto-Alignment (Smart Guides between sections)">
+        <button class="toggle-btn active" id="btnToggleSnap" title="Toggle Auto-Snap to other sections">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3v7a6 6 0 0 0 12 0V3"/><path d="M4 3h4"/><path d="M16 3h4"/><path d="M4 8h4"/><path d="M16 8h4"/></svg>
+          Auto Align
+        </button>
+        <button class="toggle-btn active" id="btnToggleRulers" title="Toggle Canvas Scale Rulers">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="10" rx="2"/><line x1="6" y1="7" x2="6" y2="11"/><line x1="10" y1="7" x2="10" y2="13"/><line x1="14" y1="7" x2="14" y2="11"/><line x1="18" y1="7" x2="18" y2="13"/></svg>
+          Scale
+        </button>
+      </div>
+    </div>
+
+    <!-- Actions & Export -->
+    <div class="header-right">
+      <!-- Undo / Redo -->
+      <div class="action-btn-group">
+        <button class="icon-btn" id="btnUndo" title="Undo (Ctrl+Z)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+        </button>
+        <button class="icon-btn" id="btnRedo" title="Redo (Ctrl+Y)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+        </button>
+      </div>
+
+      <!-- Auto Layout -->
+      <button class="secondary-btn" id="btnAutoLayout" title="Neatly rearrange tree/flowchart automatically">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+        Auto Arrange
+      </button>
+
+      <!-- Templates Dropdown -->
+      <div class="dropdown">
+        <button class="secondary-btn dropdown-trigger" id="btnTemplates">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+          Templates
+        </button>
+        <div class="dropdown-menu" id="templatesMenu">
+          <div class="menu-item" data-template="family-3gen">
+            <span class="item-title">👨‍👩‍👦 3-Generation Family Tree</span>
+            <span class="item-desc">Grandparents, parents, spouses, and kids</span>
+          </div>
+          <div class="menu-item" data-template="flowchart-standard">
+            <span class="item-title">⚡ Process & Decision Flow</span>
+            <span class="item-desc">Standard business logic with decision branch</span>
+          </div>
+          <div class="menu-item" data-template="org-chart">
+            <span class="item-title">🏢 Organization Hierarchy</span>
+            <span class="item-desc">Executive team & departmental branches</span>
+          </div>
+          <div class="menu-divider"></div>
+          <div class="menu-item text-danger" data-template="blank">
+            <span class="item-title">🗑️ Blank Canvas</span>
+            <span class="item-desc">Start fresh with a single central node</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Save / Export Dropdown Menu -->
+      <div class="dropdown">
+        <button class="primary-btn export-btn dropdown-trigger" id="btnExportMenuTrigger">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export / Save
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="dropdown-menu dropdown-menu-right" id="exportDropdown">
+          <div class="menu-header">Export Visuals</div>
+          <div class="menu-item" id="btnExportPNG">
+            <div class="menu-icon-wrap"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>
+            <div>
+              <span class="item-title">Export as PNG (High Res)</span>
+              <span class="item-desc">Transparent or solid crisp image</span>
+            </div>
+          </div>
+          <div class="menu-item" id="btnExportSVG">
+            <div class="menu-icon-wrap"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"/></svg></div>
+            <div>
+              <span class="item-title">Export as SVG Vector</span>
+              <span class="item-desc">Infinite zoom quality, editable</span>
+            </div>
+          </div>
+          <div class="menu-item" id="btnPrintPDF">
+            <div class="menu-icon-wrap"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></div>
+            <div>
+              <span class="item-title">Print / Save as PDF</span>
+              <span class="item-desc">Formatted for selected paper size</span>
+            </div>
+          </div>
+          <div class="menu-divider"></div>
+          <div class="menu-header">Project File</div>
+          <div class="menu-item" id="btnSaveJSON">
+            <div class="menu-icon-wrap"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg></div>
+            <div>
+              <span class="item-title">Download .treeflow File</span>
+              <span class="item-desc">Save project file to reopen anytime</span>
+            </div>
+          </div>
+          <div class="menu-item" id="btnLoadJSON">
+            <div class="menu-icon-wrap"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>
+            <div>
+              <span class="item-title">Open .treeflow File</span>
+              <span class="item-desc">Load previously saved project</span>
+            </div>
+          </div>
+          <input type="file" id="fileInputJSON" accept=".json,.treeflow" style="display:none" />
+        </div>
+      </div>
+
+      <!-- Theme Toggle -->
+      <button class="icon-btn" id="btnThemeToggle" title="Toggle Light / Dark Theme">
+        <svg class="icon-moon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+        <svg class="icon-sun" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none;"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Workspace Area -->
+  <main class="workspace-container" id="workspaceContainer">
+    
+    <!-- Floating Left Tool Palette -->
+    <aside class="floating-palette left-palette" id="leftPalette">
+      <div class="palette-section-title">Add Elements</div>
+      
+      <div class="add-buttons-grid" id="nodeTypeGrid">
+        <!-- Buttons populated dynamically or statically based on Mode -->
+      </div>
+
+      <div class="palette-divider"></div>
+
+      <div class="palette-section-title">Connection Style</div>
+      <div class="line-style-buttons">
+        <button class="style-choice-btn active" data-linestyle="smooth" id="btnLineSmooth" title="Smooth Bezier Curve">
+          <svg width="24" height="16" viewBox="0 0 24 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 14 C 10 14, 14 2, 22 2"/></svg>
+          Curve
+        </button>
+        <button class="style-choice-btn" data-linestyle="orthogonal" id="btnLineOrtho" title="Orthogonal Step Angles">
+          <svg width="24" height="16" viewBox="0 0 24 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 14 L 12 14 L 12 2 L 22 2"/></svg>
+          Step
+        </button>
+        <button class="style-choice-btn" data-linestyle="straight" id="btnLineStraight" title="Direct Straight Lines">
+          <svg width="24" height="16" viewBox="0 0 24 16" fill="none" stroke="currentColor" stroke-width="2"><line x1="2" y1="14" x2="22" y2="2"/></svg>
+          Direct
+        </button>
+      </div>
+
+      <div class="palette-divider"></div>
+
+      <div class="helper-hint">
+        <div class="hint-icon">💡</div>
+        <div class="hint-text"><strong>Quick Tip:</strong> Hover any card and click the small <span class="badge-plus">+</span> icons to quickly create & connect child, parent, or partner sections!</div>
+      </div>
+    </aside>
+
+    <!-- Canvas Viewport -->
+    <div class="canvas-viewport" id="canvasViewport">
+      <!-- Infinite / Sized Grid Background -->
+      <div class="canvas-world" id="canvasWorld">
+        
+        <!-- Sized Page Boundary Frame (When size is not infinite) -->
+        <div class="page-sheet" id="pageSheet">
+          <div class="page-sheet-header">
+            <span class="page-tag" id="pageSheetLabel">A4 • Landscape</span>
+            <span class="page-print-hint">Content inside this boundary fits on printed page</span>
+          </div>
+
+          <!-- SVG Layer for Connection Lines -->
+          <svg class="connections-layer" id="connectionsSvg">
+            <defs>
+              <marker id="arrowhead" markerWidth="9" markerHeight="9" refX="7" refY="3.5" orient="auto">
+                <polygon points="0 0, 8 3.5, 0 7" fill="var(--connection-line)" />
+              </marker>
+              <marker id="arrowhead-selected" markerWidth="9" markerHeight="9" refX="7" refY="3.5" orient="auto">
+                <polygon points="0 0, 8 3.5, 0 7" fill="var(--color-primary)" />
+              </marker>
+              <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+                <feGaussianBlur stdDeviation="3" result="blur" />
+                <feComposite in="SourceGraphic" in2="blur" operator="over" />
+              </filter>
+            </defs>
+            <g id="connectionsGroup"></g>
+            <g id="tempConnectionGroup"></g>
+            <g id="smartGuidesGroup"></g>
+          </svg>
+
+          <!-- DOM Nodes Layer -->
+          <div class="nodes-layer" id="nodesLayer"></div>
+        </div>
+
+      </div>
+
+      <!-- Canvas Interactive Scale Rulers -->
+      <div class="ruler-corner" id="rulerCorner" title="Scale units (pixels / mm)">px</div>
+      <canvas class="canvas-ruler ruler-horizontal" id="rulerHorizontal"></canvas>
+      <canvas class="canvas-ruler ruler-vertical" id="rulerVertical"></canvas>
+    </div>
+
+    <!-- Floating Zoom & Canvas Controls (Bottom Left) -->
+    <div class="floating-controls bottom-left-controls">
+      <button class="pill-btn" id="btnZoomOut" title="Zoom Out (Ctrl -)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </button>
+      <span class="zoom-level-text" id="zoomLevelDisplay">100%</span>
+      <button class="pill-btn" id="btnZoomIn" title="Zoom In (Ctrl +)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </button>
+      <div class="control-divider-v"></div>
+      <button class="pill-btn" id="btnZoomFit" title="Fit to Screen">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><polyline points="21 15 21 21 15 21"/><polyline points="3 9 3 3 9 3"/></svg>
+        Fit
+      </button>
+      <button class="pill-btn" id="btnResetView" title="Reset View (100%)">
+        1:1
+      </button>
+    </div>
+
+    <!-- Floating Node Inspector / Properties Panel (Right side, toggleable / contextual) -->
+    <aside class="floating-inspector" id="nodeInspector">
+      <div class="inspector-header">
+        <span class="inspector-title" id="inspectorTitle">Node Properties</span>
+        <button class="close-inspector-btn" id="btnCloseInspector">&times;</button>
+      </div>
+
+      <div class="inspector-body" id="inspectorBody">
+        <!-- When no node is selected -->
+        <div class="inspector-empty" id="inspectorEmptyState">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+          <p>Click any card or section to customize its name, relations, colors, or shape.</p>
+        </div>
+
+        <!-- Form fields when a node is selected -->
+        <div class="inspector-form" id="inspectorForm" style="display: none;">
+          <div class="form-group">
+            <label for="inputNodeTitle" id="lblNodeTitle">Primary Name / Step</label>
+            <input type="text" id="inputNodeTitle" class="form-input" placeholder="e.g. Johnathan Smith or Start Process" />
+          </div>
+
+          <div class="form-group">
+            <label for="inputNodeSubtitle" id="lblNodeSubtitle">Relation / Role / Description</label>
+            <input type="text" id="inputNodeSubtitle" class="form-input" placeholder="e.g. Grandfather or Check Valid Auth" />
+          </div>
+
+          <div class="form-group" id="groupNodeDetails">
+            <label for="inputNodeDetails" id="lblNodeDetails">Years / Metadata / Condition</label>
+            <input type="text" id="inputNodeDetails" class="form-input" placeholder="e.g. 1942 – 2018 or if user.is_active" />
+          </div>
+
+          <div class="form-group" id="groupAvatarSelect">
+            <label>Avatar / Icon Style</label>
+            <div class="avatar-choices" id="avatarChoices">
+              <button class="avatar-choice-btn active" data-avatar="man">👨 Male</button>
+              <button class="avatar-choice-btn" data-avatar="woman">👩 Female</button>
+              <button class="avatar-choice-btn" data-avatar="child">👶 Child</button>
+              <button class="avatar-choice-btn" data-avatar="elder-m">👴 Elder M</button>
+              <button class="avatar-choice-btn" data-avatar="elder-f">👵 Elder F</button>
+              <button class="avatar-choice-btn" data-avatar="none">◻️ None</button>
+            </div>
+          </div>
+
+          <div class="form-group" id="groupFlowShape">
+            <label>Flowchart Shape</label>
+            <div class="shape-choices" id="shapeChoices">
+              <button class="shape-btn active" data-shape="process">Rectangle (Process)</button>
+              <button class="shape-btn" data-shape="decision">Diamond (Decision)</button>
+              <button class="shape-btn" data-shape="terminal">Pill (Start / End)</button>
+              <button class="shape-btn" data-shape="data">Parallelogram (Data)</button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Color Theme</label>
+            <div class="color-palette-picker" id="colorPicker">
+              <button class="color-swatch-btn color-emerald" data-theme="emerald" title="Emerald Green"></button>
+              <button class="color-swatch-btn color-blue" data-theme="blue" title="Royal Blue"></button>
+              <button class="color-swatch-btn color-purple" data-theme="purple" title="Amethyst Purple"></button>
+              <button class="color-swatch-btn color-rose" data-theme="rose" title="Rose Pink"></button>
+              <button class="color-swatch-btn color-amber" data-theme="amber" title="Amber Orange"></button>
+              <button class="color-swatch-btn color-cyan" data-theme="cyan" title="Cyan Ocean"></button>
+              <button class="color-swatch-btn color-dark" data-theme="dark" title="Dark Slate"></button>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button class="danger-btn" id="btnDeleteSelectedNode">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+              Delete Card
+            </button>
+            <button class="secondary-btn" id="btnDuplicateNode" title="Clone node with same styling">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              Duplicate
+            </button>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+  </main>
+
+  <!-- Interactive Modal for Export Confirmation / Options -->
+  <div class="modal-overlay" id="exportModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="modalTitle">Export Graphic</h3>
+        <button class="modal-close-btn" id="btnModalClose">&times;</button>
+      </div>
+      <div class="modal-body" id="modalBody">
+        <!-- Rendered dynamically -->
+      </div>
+      <div class="modal-footer">
+        <button class="secondary-btn" id="btnModalCancel">Cancel</button>
+        <button class="primary-btn" id="btnModalConfirm">Download</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification System -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Scripts -->
+  <script src="app.bundle.js"></script>
+</body>
+</html>
